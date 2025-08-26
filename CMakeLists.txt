@@ -32,6 +32,7 @@ set(SOURCES
     src/shapes/shapes.cpp
     src/core/shader.cpp
     src/render/render.cpp
+    src/render/grid/grid.cpp
     src/physics/physics.cu  # Добавляем .cu файл для компиляции через nvcc
 )
 

@@ -3,7 +3,7 @@
 
 #include "core/config.h"
 #include "core/shader.h"
-#include "render/render.hpp"
+#include "render/grid/grid.hpp"
 #include "object/magneticparticle.hpp"
 
 #include <iostream>
@@ -76,6 +76,11 @@ int main() {
     MagneticParticles particles;
     particles.Initialize(50000);
 
+    glm::vec3 L(8.0f, 8.0f, 8.0f);
+    glm::ivec3 N(20, 20, 20);
+    Grid grid(L, N);
+    grid.Create();
+
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window)) {
@@ -99,6 +104,9 @@ int main() {
         shader.setMat4("uProj", projection);
         shader.setMat4("uView", view);
 
+        grid.Render(view, projection);
+
+        shader.use();
         particles.Render();
 
         glfwSwapBuffers(window);

@@ -6,6 +6,7 @@
 
 class Shader {
    public:
+    Shader ();
     Shader(const char* vertexPath, const char* fragmentPath);
     ~Shader();
 
@@ -34,6 +35,6 @@ class Shader {
     void setMat4(const std::string& name, const glm::mat4& mat) const;
 
    private:
-    GLuint ID;
+    GLuint ID = 0;
     void checkCompileErrors(GLuint shader, const std::string& type);
 };
