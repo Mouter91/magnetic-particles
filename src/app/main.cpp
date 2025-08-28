@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include "core/config.h"
+#include "core/input_handler.h"
 #include "core/shader.h"
 #include "render/grid/grid.hpp"
 #include "object/magneticparticle.hpp"
@@ -33,6 +34,12 @@ int main() {
 
     glfwSetFramebufferSizeCallback(
         window, [](GLFWwindow *, int width, int height) { glViewport(0, 0, width, height); });
+
+    AppConfig config;
+    config.domain.L = {8, 8, 8};
+    config.domain.N = {20, 20, 20};
+    config.time.lastFrame = glfwGetTime();
+    float accumulator = 0.0f;
 
     InputHandler key_bind(window);
 
@@ -73,23 +80,21 @@ int main() {
     });
 
     Shader shader("../shaders/ver_sphere.sh", "../shaders/frg_sphere.sh");
-    MagneticParticles particles;
+    MagneticParticles particles(&config);
     particles.Initialize(50000);
 
-    glm::vec3 L(8.0f, 8.0f, 8.0f);
-    glm::ivec3 N(20, 20, 20);
-    Grid grid(L, N);
+    Grid grid(config.domain.L, config.domain.N);
     grid.Create();
 
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
-        TimeControlConfig::deltaTime = currentFrame - TimeControlConfig::lastFrame;
-        TimeControlConfig::lastFrame = currentFrame;
+        config.time.deltaTime = currentFrame - config.time.lastFrame;
+        config.time.lastFrame = currentFrame;
 
-        key_bind.process();
-        key_bind.processCamera(TimeControlConfig::deltaTime);
+        key_bind.Process();
+        key_bind.ProcessCamera(config.time.deltaTime);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -107,6 +112,17 @@ int main() {
         grid.Render(view, projection);
 
         shader.use();
+
+        if (config.time.fixedStep == true) {
+            accumulator += config.time.deltaTime * config.time.timeScale;
+            while (accumulator >= config.physics.dtFixed) {
+                particles.PhysicsParticles(config.physics.dtFixed);
+                accumulator -= config.physics.dtFixed;
+            }
+        } else {
+            particles.PhysicsParticles(config.time.deltaTime * config.time.timeScale);
+        }
+
         particles.Render();
 
         glfwSwapBuffers(window);

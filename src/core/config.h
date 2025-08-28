@@ -1,9 +1,6 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include "camera.h"
+#include <glm/glm.hpp>
 
 namespace WindowConfig {
 inline constexpr unsigned int width = 800;
@@ -11,55 +8,34 @@ inline constexpr unsigned int height = 600;
 inline const char* title = "OpenGL window";
 }  // namespace WindowConfig
 
-namespace TimeControlConfig {
-inline float deltaTime = 0.0f;  // время между текущим и последним кадрами
-inline float lastFrame = 0.0f;  // время последнего кадра
-}  // namespace TimeControlConfig
+struct DomainConfig {
+    glm::vec3 L{2.0f, 2.0f, 2.0f};  // размеры куба
+    glm::ivec3 N{32, 32, 32};       // число ячеек
+};
 
-class InputHandler {
-   public:
-    // Запрещаем конструктор по умолчанию
-    InputHandler() = delete;
+struct PhysicsConfig {
+    float dtFixed{0.003f};
+    glm::vec3 gravity{0.0f, -9.8f, 0.0f};
+    float bounce{0.8f};
+    float v_eps{1e-3f};
+    bool clamp{false};  // режим: clamp или отражение
+};
 
-    // Запрещаем копирование
-    InputHandler(const InputHandler&) = delete;
-    InputHandler& operator=(const InputHandler&) = delete;
+struct RenderConfig {
+    glm::vec3 axisColors[3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+    bool drawFrame{true};
+};
 
-    // Разрешаем только создание с окном
-    explicit InputHandler(GLFWwindow* win) : window(win) {
-    }
+struct TimeConfig {
+    float deltaTime{0.0f};
+    float lastFrame{0.0f};
+    bool fixedStep{true};
+    float timeScale{1.0f};
+};
 
-    // Можно оставить перемещение запрещённым
-    InputHandler(InputHandler&&) = delete;
-    InputHandler& operator=(InputHandler&&) = delete;
-
-    ~InputHandler() = default;
-
-    void BindCamera(Camera* cam) {
-        camera = cam;
-    }
-
-    // Пример метода
-    void process() {
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-            glfwSetWindowShouldClose(window, true);
-    }
-
-    void processCamera(float deltaTime) {
-        if (!camera)
-            return;
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera->ProcessKeyboard(Camera::Movement::FORWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera->ProcessKeyboard(Camera::Movement::BACKWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera->ProcessKeyboard(Camera::Movement::LEFT, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera->ProcessKeyboard(Camera::Movement::RIGHT, deltaTime);
-    }
-
-   private:
-    GLFWwindow* window;
-    Camera* camera = nullptr;
+struct AppConfig {
+    DomainConfig domain;
+    PhysicsConfig physics;
+    RenderConfig render;
+    TimeConfig time;
 };

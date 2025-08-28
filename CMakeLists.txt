@@ -31,8 +31,10 @@ set(SOURCES
     src/app/main.cpp
     src/shapes/shapes.cpp
     src/core/shader.cpp
+    src/core/input_handler.cpp
     src/render/render.cpp
     src/render/grid/grid.cpp
+    src/object/magneticparticle.cpp
     src/physics/physics.cu  # Добавляем .cu файл для компиляции через nvcc
 )
 
